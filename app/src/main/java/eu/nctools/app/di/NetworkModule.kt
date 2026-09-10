@@ -1,13 +1,16 @@
 package eu.nctools.app.di
 
+import android.content.Context
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.squareup.okhttp3.OkHttpClient
-import com.squareup.okhttp3.logging.HttpLoggingInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
+import eu.nctools.app.BuildConfig
 import eu.nctools.app.data.api.NctoolsApi
 import eu.nctools.app.data.api.auth.AuthApi
 import eu.nctools.app.data.api.auth.AuthInterceptor
@@ -20,6 +23,10 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
+    @Provides
+    @Singleton
+    fun provideApplicationContext(@ApplicationContext context: Context): Context = context
 
     @Provides
     @Singleton

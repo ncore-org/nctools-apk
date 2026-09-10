@@ -10,14 +10,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.apache.pdfbox.Loader
-import org.apache.pdfbox.multipdf.PDFMergerUtility
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.pdmodel.PDPage
-import org.apache.pdfbox.pdmodel.PDPageContentStream
-import org.apache.pdfbox.pdmodel.common.PDRectangle
-import org.apache.pdfbox.pdmodel.graphics.image.JPEGFactory
-import org.apache.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.multipdf.PDFMergerUtility
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.pdmodel.PDPage
+import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
+import com.tom_roush.pdfbox.pdmodel.common.PDRectangle
+import com.tom_roush.pdfbox.pdmodel.graphics.image.JPEGFactory
+import com.tom_roush.pdfbox.text.PDFTextStripper
 
 /**
  * On-device document conversion engine. Mirrors every nctools.eu tool:
@@ -49,7 +48,7 @@ class ToolsEngine @Inject constructor(
             doc.addPage(page)
             val stream = PDPageContentStream(doc, page)
             stream.beginText()
-            stream.setFont(org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA, 12)
+            stream.setFont(com.tom_roush.pdfbox.pdmodel.font.PDType1Font.HELVETICA, 12f)
             stream.newLineAtOffset(50f, 750f)
             text.split("\n").forEach { line ->
                 stream.showText(line.take(120))
@@ -88,8 +87,10 @@ class ToolsEngine @Inject constructor(
         // Reuse the source PDF; OCR layer is applied as an overlay text.
         val text = extractText(pdf)
         val file = File(context.cacheDir, "document-ocr.pdf")
-        pdf.inputStream().use { input ->
-            val src = Loader.loadPDF(input.readBytes())
+        context.contentResolver.openInputStream(pdf)?.use { input ->
+            val src = com.tom_roush.pdfbox.pdmodel.PDDocument.load(
+                java.io.ByteArrayInputStream(input.readBytes())
+            )
             try {
                 if (text.isBlank()) {
                     // No embedded text → OCR each page bitmap.
@@ -158,11 +159,13 @@ class ToolsEngine @Inject constructor(
     private fun extractText(uri: Uri): String {
         val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
             ?: return ""
-        return Loader.loadPDF(bytes).use { PDFTextStripper().getText(it) }
+        return com.tom_roush.pdfbox.pdmodel.PDDocument.load(
+            java.io.ByteArrayInputStream(bytes)
+        ).use { PDFTextStripper().getText(it) }
     }
 
     /** Serialize a Bitmap to a documented JPEG stream for pdfbox. */
-    private fun toJpeg(doc: PDDocument, bmp: Bitmap): org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject {
+    private fun toJpeg(doc: PDDocument, bmp: Bitmap): com.tom_roush.pdfbox.pdmodel.graphics.image.PDImageXObject {
         val bos = java.io.ByteArrayOutputStream()
         bmp.compress(Bitmap.CompressFormat.JPEG, 90, bos)
         return JPEGFactory.createFromStream(doc, java.io.ByteArrayInputStream(bos.toByteArray()))

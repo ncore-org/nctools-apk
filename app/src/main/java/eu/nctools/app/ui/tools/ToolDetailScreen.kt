@@ -25,6 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -45,6 +47,7 @@ import eu.nctools.app.core.tools.ToolCatalog
  * on dismissal the on-device conversion runs and the output file is ready to
  * share. Uses the same file picker API across tools.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToolDetailScreen(
     slug: String,
@@ -92,9 +95,9 @@ fun ToolDetailScreen(
                 eng.ocrToText(pickedUris.first())
             }
             "photo-scanner" -> viewModel.convert(activity!!) {
-                eng.photoScanner(cameraBitmap ?: run {
-                    viewModel.setError("Capture a photo first."); return@run android.graphics.Bitmap.createBitmap(1,1,android.graphics.Bitmap.Config.ARGB_8888)
-                })
+                val bmp = cameraBitmap
+                    ?: throw IllegalStateException("Capture a photo first.")
+                eng.photoScanner(bmp)
             }
             "images-to-pdf" -> viewModel.convert(activity!!) {
                 eng.imagesToPdf(pickedUris.map { uri ->
@@ -105,8 +108,7 @@ fun ToolDetailScreen(
             }
             "merge-pdf" -> viewModel.convert(activity!!) {
                 if (pickedUris.size < 2) {
-                    viewModel.setError("Pick at least two PDFs to merge.")
-                    throw IllegalStateException()
+                    throw IllegalStateException("Pick at least two PDFs to merge.")
                 }
                 eng.mergePdf(pickedUris)
             }

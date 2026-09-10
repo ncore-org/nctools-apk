@@ -4,8 +4,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -53,6 +51,10 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/INDEX.LIST"
+            excludes += "/META-INF/DEPENDENCIES"
+            excludes += "/META-INF/LICENSE*"
+            excludes += "/META-INF/NOTICE*"
         }
     }
 }
@@ -91,9 +93,8 @@ dependencies {
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // PDF / document tooling
+    // PDF / document tooling (pdfbox does the heavy lifting; no viewer needed)
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
-    implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
 
     // OCR
     implementation("com.rmtheis:tess-two:9.1.0")
@@ -101,16 +102,11 @@ dependencies {
     // Google Drive
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.api-client:google-api-client-android:2.6.0")
-    implementation("com.google.apis:google-api-services-drive:v3-rev20241006-2.6.0")
+    implementation("com.google.apis:google-api-services-drive:v3-rev20260901-2.0.0")
     implementation("androidx.credentials:credentials:1.3.0")
 
-    // Ads
+    // Ads (AdMob — independent of Firebase)
     implementation("com.google.android.gms:play-services-ads:23.4.0")
-
-    // Firebase / Analytics / Crashlytics
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")

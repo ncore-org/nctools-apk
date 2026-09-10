@@ -42,6 +42,9 @@ class AuthRepository @Inject constructor(
         }
     }
 
+    /** Called at cold start: restore a persisted session (non-blocking). */
+    fun restoreSession() = hydrate()
+
     suspend fun login(email: String, password: String): Boolean {
         _authError.value = null
         return try {

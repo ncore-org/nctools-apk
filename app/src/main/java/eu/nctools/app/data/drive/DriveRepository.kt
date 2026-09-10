@@ -3,7 +3,9 @@ package eu.nctools.app.data.drive
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import kotlinx.coroutines.runBlocking
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
@@ -32,7 +34,7 @@ import kotlinx.coroutines.withContext
  */
 @Singleton
 class DriveRepository @Inject constructor(
-    @androidx.hilt.android.qualifiers.ApplicationContext private val context: Context,
+    @ApplicationContext private val context: Context,
     private val userPrefs: UserPrefs,
 ) {
     private val _linked = MutableStateFlow<Boolean>(false)
@@ -44,7 +46,7 @@ class DriveRepository @Inject constructor(
     init {
         // Refresh link state if we already hold an account.
         val acct = GoogleSignIn.getLastSignedInAccount(context)
-        if (acct != null && userPrefs.driveLinked.first() == true) {
+        if (acct != null && runBlocking { userPrefs.driveLinked.first() }) {
             _linked.value = true
             buildClient()
             buildDriveService(acct.email)

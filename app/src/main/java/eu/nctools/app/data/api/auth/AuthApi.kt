@@ -6,7 +6,7 @@ import retrofit2.http.GET
 import eu.nctools.app.data.model.UserDto
 
 /**
- * Auth API mirroring nctools.eu/API/auth/*. The mobile app shares the same
+ * Auth API mirroring nctools.eu endpoints under /api/auth. The mobile app shares the same
  * local PostgreSQL account system, so a user logged in on the web is a user in
  * the app. Passwords are validated server-side with the same scrypt scheme.
  */

@@ -2,7 +2,6 @@ package eu.nctools.app
 
 import android.app.Application
 import com.google.android.gms.ads.MobileAds
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
 import eu.nctools.app.core.update.UpdateManager
 import eu.nctools.app.data.auth.AuthRepository
@@ -10,7 +9,7 @@ import javax.inject.Inject
 
 /**
  * nctools application entry point.
- * Initializes ads (GDPR-consent gated), crash reporting and the update check
+ * Initializes ads (GDPR-consent gated), session restore and the update check
  * against the nctools.backend update API.
  */
 @HiltAndroidApp
@@ -22,13 +21,11 @@ class NctoolsApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Crash reporting always on (non-personalized, no consent needed).
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-
         // Ads load only after consent (see ConsentGate). Pre-initialize AdMob.
         MobileAds.initialize(this) { }
 
-        // Kick off a background update check without blocking startup.
+        // Restore a persisted session and kick off a background update check.
+        authRepository.restoreSession()
         updateManager.checkForUpdates()
     }
 }

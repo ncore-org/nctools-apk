@@ -9,6 +9,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class ConsentState(
@@ -26,8 +27,11 @@ class ConsentViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            val ads = userPrefs.adsConsent.collect {}
-            _consent.value = ConsentState(resolved = true, adsEnabled = false)
+            val adsGranted = userPrefs.adsConsent.first()
+            _consent.value = ConsentState(
+                resolved = adsGranted || userPrefs.analyticsConsent.first(),
+                adsEnabled = adsGranted,
+            )
         }
     }
 

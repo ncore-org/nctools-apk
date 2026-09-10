@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.FileProvider
 import eu.nctools.app.data.model.UpdateResponse
 import eu.nctools.app.data.api.NctoolsApi
+import eu.nctools.app.BuildConfig
 import java.security.MessageDigest
 import java.util.UUID
 import javax.inject.Inject
@@ -89,7 +90,7 @@ class UpdateManager @Inject constructor(
     /** Lightweight device fingerprint used by the backend anti-crack gate. */
     private fun computeInstallToken(): String {
         val body = "${Build.MODEL}|${Build.BRAND}|${BuildConfig.VERSION_CODE}|${context.packageName}"
-        return sha256(body)
+        return sha256(body.toByteArray())
     }
 
     fun downloadAndInstall(state: UpdateState.Available) {
