@@ -18,7 +18,7 @@ private val Context.preferencesDataStore: DataStore<Preferences> by preferencesD
 /**
  * Account/consent preferences stored via DataStore (non-secret).
  * The session token lives in AuthTokenStore (encrypted); this holds consent,
- * drive-linking flags and the last status.
+ * guest mode, drive-linking flags and the last status.
  */
 @Singleton
 class UserPrefs @Inject constructor(@ApplicationContext context: Context) {
@@ -30,12 +30,14 @@ class UserPrefs @Inject constructor(@ApplicationContext context: Context) {
         val driveLinked = booleanPreferencesKey("drive_linked")
         val driveEmail = stringPreferencesKey("drive_email")
         val lastTool = stringPreferencesKey("last_tool")
+        val guestMode = booleanPreferencesKey("guest_mode")
     }
 
     val adsConsent: Flow<Boolean> = store.data.map { it[Keys.adsConsent] ?: false }
     val analyticsConsent: Flow<Boolean> = store.data.map { it[Keys.analyticsConsent] ?: false }
     val driveLinked: Flow<Boolean> = store.data.map { it[Keys.driveLinked] ?: false }
     val driveEmail: Flow<String?> = store.data.map { it[Keys.driveEmail] }
+    val guestMode: Flow<Boolean> = store.data.map { it[Keys.guestMode] ?: false }
 
     suspend fun grantAdsConsent() { store.edit { it[Keys.adsConsent] = true } }
     suspend fun grantAnalyticsConsent() { store.edit { it[Keys.analyticsConsent] = true } }
@@ -45,6 +47,7 @@ class UserPrefs @Inject constructor(@ApplicationContext context: Context) {
             it[Keys.analyticsConsent] = false
         }
     }
+    suspend fun setGuestMode(enabled: Boolean) { store.edit { it[Keys.guestMode] = enabled } }
     suspend fun setDriveLinked(email: String?) {
         store.edit {
             it[Keys.driveLinked] = email != null

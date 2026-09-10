@@ -12,13 +12,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LandingScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
+fun LandingScreen(
+    onLogin: () -> Unit,
+    onRegister: () -> Unit,
+    onGuest: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxSize().statusBarsPadding().padding(28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -35,5 +40,13 @@ fun LandingScreen(onLogin: () -> Unit, onRegister: () -> Unit) {
         Button(onClick = onLogin, modifier = Modifier.fillMaxWidth()) { Text("Sign in") }
         Spacer(Modifier.height(8.dp))
         OutlinedButton(onClick = onRegister, modifier = Modifier.fillMaxWidth()) { Text("Create account") }
+        Spacer(Modifier.height(20.dp))
+        TextButton(onClick = onGuest) { Text("Continue as guest", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            "No sign-up needed — every tool works right away. Sign in anytime to sync.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }

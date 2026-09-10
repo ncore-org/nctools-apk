@@ -17,7 +17,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,16 +31,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun RegisterScreen(
     viewModel: AuthViewModel,
     onBack: () -> Unit,
-    onRegistered: () -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val state by viewModel.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(state.user) {
-        if (state.user != null) onRegistered()
-    }
 
     Column(
         modifier = Modifier

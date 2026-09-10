@@ -31,6 +31,13 @@ interface AuthApi {
     data class LoginRequest(val email: String, val password: String)
     data class GoogleExchangeRequest(val idToken: String)
 
-    data class AuthResponse(val user: UserDto?, val token: String?, val error: String?)
-    data class SessionResponse(val user: UserDto?)
+    // All fields are nullable WITH defaults so Moshi never throws on a partial
+    // server response (e.g. success payloads that omit `error`). Missing values
+    // deserialize to null instead of raising "Network error".
+    data class AuthResponse(
+        val user: UserDto? = null,
+        val token: String? = null,
+        val error: String? = null,
+    )
+    data class SessionResponse(val user: UserDto? = null)
 }

@@ -43,14 +43,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun DashboardScreen(
     viewModel: AuthViewModel,
+    isGuest: Boolean = false,
     onOpenTool: (String) -> Unit,
+    onSignIn: () -> Unit = {},
 ) {
     // Tools are a static registry — mirrors the nctools.eu catalog.
     val toolList = remember { ToolCatalog.all }
     val state by viewModel.state.collectAsStateWithLifecycle()
     val user = state.user
 
-    // Google Drive linking — same flow as the web dashboard.
+    // Google Drive linking — same flow as the web dashboard. Requires an account.
     val driveSignIn: DriveViewModel = hiltViewModel()
     val drivePicker = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         driveSignIn.handleResult(result.resultCode, result.data)
@@ -67,17 +69,21 @@ fun DashboardScreen(
                         Text("·", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            user?.name ?: user?.email ?: "Dashboard",
+                            if (isGuest) "Guest"
+                            else user?.name ?: user?.email ?: "Dashboard",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 },
                 actions = {
-                    OutlinedButton(onClick = { viewModel.logout() }, contentPadding = PaddingValues(horizontal = 12.dp)) {
+                    OutlinedButton(
+                        onClick = { if (isGuest) onSignIn() else viewModel.logout() },
+                        contentPadding = PaddingValues(horizontal = 12.dp),
+                    ) {
                         Icon(Icons.Filled.Person, contentDescription = null, modifier = Modifier.width(18.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("Sign out", style = MaterialTheme.typography.labelMedium)
+                        Text(if (isGuest) "Sign in" else "Sign out", style = MaterialTheme.typography.labelMedium)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -92,39 +98,67 @@ fun DashboardScreen(
                 .padding(padding)
                 .padding(16.dp),
         ) {
-            Text("Your private document workspace", style = MaterialTheme.typography.titleMedium)
+            Text(if (isGuest) "Your private document workspace" else "Welcome back", style = MaterialTheme.typography.titleMedium)
             Text(
                 "Convert PDFs, scan, merge and OCR — everything stays on your device.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(Modifier.height(16.dp))
-            // Google Drive linking card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+
+            // Guest mode banner — invite sign-in for Drive + sync.
+            if (isGuest) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                 ) {
-                    Text(
-                        if (driveLinked) "Google Drive connected" else "Connect Google Drive",
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier.weight(1f),
-                    )
-                    if (driveLinked) {
-                        OutlinedButton(onClick = { driveSignIn.signOut() }) { Text("Disconnect") }
-                    } else {
-                        Button(onClick = {
-                            driveSignIn.signInIntent()?.let { intent ->
-                                drivePicker.launch(intent)
-                            }
-                        }) { Text("Connect") }
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(Modifier.weight(1f)) {
+                            Text("You're using nctools as a guest", style = MaterialTheme.typography.titleSmall)
+                            Text(
+                                "All tools work right now. Sign in to back up to Google Drive and sync across devices.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        Button(onClick = onSignIn) { Text("Sign in") }
                     }
                 }
+                Spacer(Modifier.height(16.dp))
             }
-            Spacer(Modifier.height(16.dp))
+
+            // Google Drive linking card (account-only feature).
+            if (!isGuest) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            if (driveLinked) "Google Drive connected" else "Connect Google Drive",
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.weight(1f),
+                        )
+                        if (driveLinked) {
+                            OutlinedButton(onClick = { driveSignIn.signOut() }) { Text("Disconnect") }
+                        } else {
+                            Button(onClick = {
+                                driveSignIn.signInIntent()?.let { intent ->
+                                    drivePicker.launch(intent)
+                                }
+                            }) { Text("Connect") }
+                        }
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
+
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(150.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),

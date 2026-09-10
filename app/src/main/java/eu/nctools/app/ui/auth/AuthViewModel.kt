@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import eu.nctools.app.data.auth.AuthRepository
 import eu.nctools.app.data.auth.AuthTokenStore
+import eu.nctools.app.data.auth.UserPrefs
 import eu.nctools.app.data.model.UserDto
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,12 +17,14 @@ data class AuthUiState(
     val user: UserDto? = null,
     val loading: Boolean = false,
     val error: String? = null,
+    val guestMode: Boolean = false,
 )
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: AuthRepository,
     private val tokenStore: AuthTokenStore,
+    private val userPrefs: UserPrefs,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthUiState(user = repository.user.value))
@@ -31,12 +34,18 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             repository.user.collect { user -> _state.value = _state.value.copy(user = user) }
         }
+        viewModelScope.launch {
+            userPrefs.guestMode.collect { guest ->
+                _state.value = _state.value.copy(guestMode = guest)
+            }
+        }
     }
 
     fun login(email: String, password: String) {
         _state.value = _state.value.copy(loading = true, error = null)
         viewModelScope.launch {
             val ok = repository.login(email, password)
+            if (ok) userPrefs.setGuestMode(false)
             _state.value = _state.value.copy(
                 loading = false,
                 error = repository.authError.value,
@@ -49,6 +58,7 @@ class AuthViewModel @Inject constructor(
         _state.value = _state.value.copy(loading = true, error = null)
         viewModelScope.launch {
             val ok = repository.register(name, email, password)
+            if (ok) userPrefs.setGuestMode(false)
             _state.value = _state.value.copy(
                 loading = false,
                 error = repository.authError.value,
@@ -57,10 +67,21 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    /** Enter guest mode — every tool works on-device, no account required. */
+    fun continueAsGuest() {
+        viewModelScope.launch { userPrefs.setGuestMode(true) }
+    }
+
+    /** Leave guest mode and return to the sign-in screen. */
+    fun exitGuest() {
+        viewModelScope.launch { userPrefs.setGuestMode(false) }
+    }
+
     fun logout() {
         viewModelScope.launch {
             repository.logout()
-            _state.value = _state.value.copy(user = null, error = null)
+            userPrefs.setGuestMode(false)
+            _state.value = _state.value.copy(user = null, error = null, guestMode = false)
         }
     }
 
