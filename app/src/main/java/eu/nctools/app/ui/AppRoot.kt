@@ -19,6 +19,7 @@ import eu.nctools.app.ui.auth.RegisterScreen
 import eu.nctools.app.ui.consent.ConsentGate
 import eu.nctools.app.ui.dashboard.DashboardScreen
 import eu.nctools.app.ui.intro.IntroScreen
+import eu.nctools.app.ui.settings.SettingsScreen
 import eu.nctools.app.ui.tools.ToolDetailScreen
 import eu.nctools.app.ui.tools.ToolsViewModel
 
@@ -70,6 +71,15 @@ private fun MainNavFlow(
                 viewModel = authViewModel,
                 isGuest = isGuest,
                 onOpenTool = { navController.navigate("tool/$it") },
+                onSignIn = { authViewModel.exitGuest() },
+                onOpenSettings = { navController.navigate("settings") },
+            )
+        }
+        composable("settings") {
+            SettingsScreen(
+                viewModel = authViewModel,
+                isGuest = isGuest,
+                onBack = { navController.popBackStack() },
                 onSignIn = { authViewModel.exitGuest() },
             )
         }

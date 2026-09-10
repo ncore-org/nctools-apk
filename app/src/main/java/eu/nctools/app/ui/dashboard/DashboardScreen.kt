@@ -28,10 +28,12 @@ import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -61,6 +63,7 @@ fun DashboardScreen(
     isGuest: Boolean = false,
     onOpenTool: (String) -> Unit,
     onSignIn: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
 ) {
     val toolList = remember { ToolCatalog.all }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -71,7 +74,6 @@ fun DashboardScreen(
         driveSignIn.handleResult(result.resultCode, result.data)
     }
     val driveLinked by driveSignIn.linked.collectAsStateWithLifecycle()
-
     val primary = MaterialTheme.colorScheme.primary
     val onPrimary = MaterialTheme.colorScheme.onPrimary
 
@@ -97,6 +99,9 @@ fun DashboardScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Outlined.Settings, contentDescription = "Settings")
+                    }
                     OutlinedButton(
                         onClick = { if (isGuest) onSignIn() else viewModel.logout() },
                         contentPadding = PaddingValues(horizontal = 12.dp),
