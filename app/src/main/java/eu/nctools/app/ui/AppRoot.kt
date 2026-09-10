@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -15,6 +18,7 @@ import eu.nctools.app.ui.auth.LoginScreen
 import eu.nctools.app.ui.auth.RegisterScreen
 import eu.nctools.app.ui.consent.ConsentGate
 import eu.nctools.app.ui.dashboard.DashboardScreen
+import eu.nctools.app.ui.intro.IntroScreen
 import eu.nctools.app.ui.tools.ToolDetailScreen
 import eu.nctools.app.ui.tools.ToolsViewModel
 
@@ -28,6 +32,13 @@ import eu.nctools.app.ui.tools.ToolsViewModel
  */
 @Composable
 fun AppRoot() {
+    // Branded animated intro, shown once per cold start, then handed off.
+    var showIntro by remember { mutableStateOf(true) }
+    if (showIntro) {
+        IntroScreen(onFinished = { showIntro = false })
+        return
+    }
+
     val authViewModel: AuthViewModel = hiltViewModel()
     val state by authViewModel.state.collectAsStateWithLifecycle()
 

@@ -2,17 +2,21 @@
 <resources>
     <!-- Base app theme -->
     <style name="Theme.Nctools" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">@null</item>
+        <item name="android:windowBackground">@color/surface</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <color name="primary">#16A34A</color>
-    <color name="primary_dark">#15803D</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="background">#F7F9F8</color>
-    <color name="text_primary">#0F1A15</color>
-    <color name="text_muted">#6B7C74</color>
-    <color name="error">#DC2626</color>
+    <!--
+      Branded launch splash. Shown by the OS the instant the launcher icon is
+      tapped (icon centred on the brand background), then handed off to the
+      Compose animated intro. Requires core-splashscreen.
+    -->
+    <style name="Theme.Nctools.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/primary</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenAnimationDuration">600</item>
+        <item name="postSplashScreenTheme">@style/Theme.Nctools</item>
+    </style>
 </resources>

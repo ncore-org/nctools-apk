@@ -21,7 +21,7 @@ android {
 
         // Backend API origin (matches the nctools.eu deployment).
         buildConfigField("String", "API_ORIGIN", "\"https://nctools.eu\"")
-        buildConfigField("String", "ADS_UNIT_ID", "\"ca-app-pub-5404699533591624/0000000000\"")
+        // ADS_UNIT_ID is set per build type (test units in debug, live in release).
     }
 
     buildTypes {
@@ -33,10 +33,15 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
+            // TODO: replace with the live AdMob interstitial unit once approved.
+            buildConfigField("String", "ADS_UNIT_ID", "\"ca-app-pub-5404699533591624/0000000000\"")
         }
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            // Google's official *test* interstitial unit. Renders a real 15s
+            // interstitial and never crashes — safe without an AdMob account.
+            buildConfigField("String", "ADS_UNIT_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
         }
     }
     compileOptions {
@@ -67,9 +72,14 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
+    implementation("androidx.compose.ui:ui-graphics")
+    implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.8.4")
+
+    // Splash screen (branded launch animation)
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
     // Lifecycle / ViewModel
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")

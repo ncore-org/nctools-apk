@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- nctools adaptive-icon foreground: a clean "n" monogram with rounded corner
+     shoulders, centred inside the 108dp adaptive safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#16A34A"
-        android:pathData="M0,0h108v108h-108z" />
-    <path
         android:fillColor="#FFFFFF"
-        android:pathData="M28,22h52v18h-34v10h34v14h-34v14h34v18h-52z" />
+        android:pathData="M30,80 L30,46 Q30,30 46,30 L62,30 Q78,30 78,46 L78,80 L65,80 L65,48 Q65,43 60,43 L48,43 Q43,43 43,48 L43,80 Z" />
 </vector>

@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import eu.nctools.app.core.ads.findActivity
 import eu.nctools.app.core.tools.ToolCatalog
 
 /**
@@ -58,7 +59,7 @@ fun ToolDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val tool = remember(slug) { ToolCatalog.bySlug(slug) }
     val context = LocalContext.current
-    val activity = context as? android.app.Activity
+    val activity = remember(context) { context.findActivity() }
 
     var pickedUris by remember { mutableStateOf<List<Uri>>(emptyList()) }
     var inputText by remember { mutableStateOf("") }
@@ -79,34 +80,34 @@ fun ToolDetailScreen(
     fun startConversion() {
         val eng = viewModel.toolEngine()
         when (slug) {
-            "paste-to-pdf" -> viewModel.convert(activity!!) {
+            "paste-to-pdf" -> viewModel.convert(activity) {
                 eng.pasteToPdf(inputText.ifBlank { " " })
             }
-            "pdf-to-word" -> viewModel.convert(activity!!) {
+            "pdf-to-word" -> viewModel.convert(activity) {
                 eng.pdfToWord(pickedUris.first())
             }
-            "pdf-to-excel" -> viewModel.convert(activity!!) {
+            "pdf-to-excel" -> viewModel.convert(activity) {
                 eng.pdfToExcel(pickedUris.first())
             }
-            "pdf-to-ocr" -> viewModel.convert(activity!!) {
+            "pdf-to-ocr" -> viewModel.convert(activity) {
                 eng.pdfToOcr(pickedUris.first())
             }
-            "ocr-to-text" -> viewModel.convert(activity!!) {
+            "ocr-to-text" -> viewModel.convert(activity) {
                 eng.ocrToText(pickedUris.first())
             }
-            "photo-scanner" -> viewModel.convert(activity!!) {
+            "photo-scanner" -> viewModel.convert(activity) {
                 val bmp = cameraBitmap
                     ?: throw IllegalStateException("Capture a photo first.")
                 eng.photoScanner(bmp)
             }
-            "images-to-pdf" -> viewModel.convert(activity!!) {
+            "images-to-pdf" -> viewModel.convert(activity) {
                 eng.imagesToPdf(pickedUris.map { uri ->
                     val bmp = context.contentResolver.openInputStream(uri)?.use { android.graphics.BitmapFactory.decodeStream(it) }
                         ?: android.graphics.Bitmap.createBitmap(1,1,android.graphics.Bitmap.Config.ARGB_8888)
                     bmp
                 })
             }
-            "merge-pdf" -> viewModel.convert(activity!!) {
+            "merge-pdf" -> viewModel.convert(activity) {
                 if (pickedUris.size < 2) {
                     throw IllegalStateException("Pick at least two PDFs to merge.")
                 }

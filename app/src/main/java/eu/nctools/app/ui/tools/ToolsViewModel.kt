@@ -43,22 +43,30 @@ class ToolsViewModel @Inject constructor(
     /**
      * Start the requested conversion. Every interaction is gated behind one
      * 15s interstitial ad (AdGate), which runs the tool once dismissed.
-     * Fails safe: if ads are unavailable the tool still runs.
+     * Fails safe: a null Activity or unavailable ad still runs the tool.
      */
-    fun convert(activity: Activity, conversion: suspend () -> ToolsEngine.Result) {
+    fun convert(activity: Activity?, conversion: suspend () -> ToolsEngine.Result) {
         if (_state.value.running) return
         _state.value = _state.value.copy(running = true, error = null, resultPath = null)
-        adGate.begin(activity) {
-            viewModelScope.launch {
-                try {
-                    val res = conversion()
-                    _state.value = _state.value.copy(resultPath = res.output.absolutePath)
-                    reportEvent(adShown = true)
-                } catch (e: Exception) {
-                    _state.value = _state.value.copy(error = e.message ?: "Conversion failed. Please try again.")
-                } finally {
-                    _state.value = _state.value.copy(running = false)
-                }
+        val act = activity
+        if (act == null || act.isFinishing || act.isDestroyed) {
+            // No host activity to show an ad — run the tool directly.
+            runConversion(conversion)
+        } else {
+            adGate.begin(act) { runConversion(conversion) }
+        }
+    }
+
+    private fun runConversion(conversion: suspend () -> ToolsEngine.Result) {
+        viewModelScope.launch {
+            try {
+                val res = conversion()
+                _state.value = _state.value.copy(resultPath = res.output.absolutePath)
+                reportEvent(adShown = true)
+            } catch (e: Exception) {
+                _state.value = _state.value.copy(error = e.message ?: "Conversion failed. Please try again.")
+            } finally {
+                _state.value = _state.value.copy(running = false)
             }
         }
     }

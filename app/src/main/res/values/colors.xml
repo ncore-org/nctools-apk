@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- nctools brand palette -->
+    <color name="primary">#2563EB</color>
+    <color name="primary_dark">#1E40AF</color>
+    <color name="accent">#7C3AED</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_dark">#0F172A</color>
+    <color name="on_primary">#FFFFFF</color>
+</resources>
