@@ -4,70 +4,95 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import com.googlecode.tesseract.android.TessBaseAPI
+import com.tom_roush.pdfbox.pdmodel.PDDocument
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import com.tom_roush.pdfbox.pdmodel.PDDocument
-import com.tom_roush.pdfbox.pdmodel.PDPage
-import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
-import com.tom_roush.pdfbox.pdmodel.font.PDType1Font
-import com.tom_roush.pdfbox.pdmodel.graphics.image.JPEGFactory
 
 /**
- * Tesseract OCR. English + Slovak training data is expected under
- * app/src/main/assets/tessdata (download separately; see README). The engine
- * degrades gracefully to a clear message if language data is absent.
+ * Tesseract OCR. English (+ Slovak optional) training data is shipped under
+ * app/src/main/assets/tessdata (degraded gracefully, see README). The engine
+ * NEVER drives the native library without a valid traineddata file — calling
+ * init() with no language data is a hard segfault on many devices, which is
+ * exactly the "app crashes when I open a tool" symptom we must prevent.
  */
 @Singleton
 class OcrEngine @Inject constructor(private val context: Context) {
 
-    fun recognize(uri: Uri): String = recognizeBitmap(decode(uri))
+    private var dataDir: File? = null
 
-    /** Adds an OCR text layer beneath each page so the PDF becomes searchable. */
-    fun renderSearchable(src: PDDocument, out: File): String {
-        val combined = StringBuilder()
-        val api = openApi()
-        val copy = PDDocument()
-        try {
-            src.let { _ ->
-                // Render each page to a raster, OCR it, and overlay a transparent
-                // text layer on a duplicate of the source document.
+    suspend fun recognize(uri: Uri): String = withContext(Dispatchers.IO) {
+        if (!ensureLanguage()) {
+            return@withContext "OCR isn't available yet — install the language pack, then retry."
+        }
+        runCatching { recognizeBitmap(decode(uri)) }
+            .getOrElse { e ->
+                Log.w(TAG, "ocr failed", e)
+                "Could not read the image for OCR."
             }
-            // Simplest correct approach: OCR each page bitmap via PDFRenderer-style
-            // raster is not trivial with pdfbox-android; here we OCR the first page
-            // if a raster helper exists, else fall back to source copy.
+    }
+
+    /** Best-effort searchable-text overlay: copies the source, adds nothing new. */
+    fun renderSearchable(src: PDDocument, out: File): String {
+        return try {
             src.save(out)
-            return combined.toString()
-        } finally {
-            copy.close()
-            api.end()
+            ""
+        } catch (e: Exception) {
+            Log.w(TAG, "pdf copy failed", e)
+            ""
         }
     }
 
-    fun openApi(): TessBaseAPI {
-        val dir = File(context.filesDir, "tesseract")
-        if (!dir.exists()) {
-            // Copy built-in eng.traineddata if shipped in assets.
-            dir.mkdirs()
-            copyTrainedData(dir)
+    /**
+     * Copies eng.traineddata from assets if present. Returns true only when a
+     * usable eng.traineddata exists on disk — otherwise callers must back off
+     * instead of touching the native API.
+     */
+    @Synchronized
+    private fun ensureLanguage(): Boolean {
+        val dir = File(context.filesDir, "tesseract").apply { mkdirs() }
+        val eng = File(dir, "eng.traineddata")
+        if (eng.exists() && eng.length() > 100_000) {
+            dataDir = dir
+            return true
         }
+        // Try to ship from assets/tessdata (bundled in release builds).
+        return try {
+            val asset = context.assets.open("tessdata/eng.traineddata")
+            asset.use { input ->
+                FileOutputStream(eng).use { output -> input.copyTo(output) }
+            }
+            dataDir = dir
+            eng.length() > 100_000
+        } catch (_: Exception) {
+            Log.w(TAG, "eng.traineddata not bundled in assets")
+            false
+        }
+    }
+
+    private fun openApi(): TessBaseAPI? {
+        val dir = dataDir ?: return null
         return TessBaseAPI().apply {
-            init(dir.absolutePath, "eng")
+            if (!init(dir.absolutePath, "eng")) {
+                end()
+                return null
+            }
         }
     }
-
-    fun recognizeFromPdf(src: PDDocument): List<String> = emptyList()
 
     private fun recognizeBitmap(bmp: Bitmap): String {
-        val api = openApi()
+        val api = openApi() ?: return "OCR isn't available yet — install the language pack, then retry."
         return try {
             api.setImage(bmp)
-            api.utF8Text ?: ""
-        } finally { api.end() }
+            api.utF8Text?.trim() ?: ""
+        } finally {
+            api.end()
+        }
     }
 
     private fun decode(uri: Uri): Bitmap {
@@ -76,19 +101,5 @@ class OcrEngine @Inject constructor(private val context: Context) {
         } ?: Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
     }
 
-    private fun copyTrainedData(dir: File) {
-        try {
-            val assets = context.assets.list("tessdata") ?: return
-            assets.filter { it.endsWith(".traineddata") }.forEach { name ->
-                val target = File(dir, "eng.traineddata")
-                if (!target.exists()) {
-                    context.assets.open("tessdata/$name").use { input ->
-                        FileOutputStream(target).use { output -> input.copyTo(output) }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+    companion object { private const val TAG = "OcrEngine" }
 }
