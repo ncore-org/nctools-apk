@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">nctools</string>
+    <string name="tagline">Private document tools</string>
+
+    <!-- Auth -->
+    <string name="login_title">Welcome back</string>
+    <string name="login_email">Email</string>
+    <string name="login_password">Password</string>
+    <string name="login_singin_hint_g">Continue with Google</string>
+    <string name="register_title">Create your account</string>
+    <string name="logout">Sign out</string>
+
+    <!-- Dashboard / nav -->
+    <string name="tab_tools">Tools</string>
+    <string name="tab_files">My Files</string>
+    <string name="tab_account">Account</string>
+    <string name="dashboard_subtitle">Your private document workspace</string>
+
+    <!-- Tools -->
+    <string name="tool_paste_to_pdf">Paste to PDF</string>
+    <string name="tool_pdf_to_word">PDF to Word</string>
+    <string name="tool_pdf_to_excel">PDF to Excel</string>
+    <string name="tool_pdf_to_ocr">PDF to OCR</string>
+    <string name="tool_ocr_to_text">OCR to Text</string>
+    <string name="tool_photo_scanner">Photo Scanner</string>
+    <string name="tool_images_to_pdf">Images to PDF</string>
+    <string name="tool_merge_pdf">Merge PDF</string>
+
+    <!-- Ads -->
+    <string name="ad_gate_title">A quick ad keeps nctools free</string>
+    <string name="ad_gate_skip_after">Continues in %1$ds</string>
+    <string name="ad_gate_done">Now exporting…</string>
+
+    <!-- Drive -->
+    <string name="drive_connect">Connect Google Drive</string>
+    <string name="drive_save">Save to Drive</string>
+
+    <!-- Updates -->
+    <string name="update_available">Update available</string>
+    <string name="update_install">Get update</string>
+</resources>

@@ -1,0 +1,32 @@
+# nctools for Android — Google Drive `apply false` config notes.
+# TODO: replace with your own google-services.json from Firebase console.
+# See README "Build" section. This file is git-ignored.
+{
+  "project_info": {
+    "project_number": "000000000000",
+    "project_id": "nctools-android",
+    "storage_bucket": "nctools-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "android_client_info": {
+          "package_name": "eu.nctools.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyPLACEHOLDER"
+        }
+      ],
+      "services": {
+        "appinvite_service": { "other_platform_oauth_client": [] },
+        "analytics_service": { "status": 2 },
+        "ads_service": { "status": 2 }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
