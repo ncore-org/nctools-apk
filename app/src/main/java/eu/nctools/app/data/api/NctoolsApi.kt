@@ -41,5 +41,6 @@ interface NctoolsApi {
         val tool: String,
         val adShown: Boolean,
         val durationMs: Long,
+        val deviceId: String? = null,
     )
 }
