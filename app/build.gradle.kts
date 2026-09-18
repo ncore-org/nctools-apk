@@ -33,15 +33,15 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("debug")
-            // TODO: replace with the live AdMob interstitial unit once approved.
-            buildConfigField("String", "ADS_UNIT_ID", "\"ca-app-pub-5404699533591624/0000000000\"")
+            // Live AdMob interstitial unit (nctools AdMob account).
+            buildConfigField("String", "ADS_UNIT_ID", "\"ca-app-pub-5404699533591624/8319649115\"")
         }
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
-            // Google's official *test* interstitial unit. Renders a real 15s
-            // interstitial and never crashes — safe without an AdMob account.
-            buildConfigField("String", "ADS_UNIT_ID", "\"ca-app-pub-3940256099942544/1033173712\"")
+            // Live AdMob interstitial unit (nctools AdMob account) so the real
+            // ad renders during development; fails gracefully via AdGate.
+            buildConfigField("String", "ADS_UNIT_ID", "\"ca-app-pub-5404699533591624/8319649115\"")
         }
     }
     compileOptions {

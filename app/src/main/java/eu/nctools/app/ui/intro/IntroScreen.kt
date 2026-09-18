@@ -154,7 +154,11 @@ fun IntroScreen(onFinished: () -> Unit) {
                     .size(104.dp)
                     .graphicsLayer { scaleX = heroScale; scaleY = heroScale; alpha = heroAlpha }
                     .clip(androidx.compose.foundation.shape.RoundedCornerShape(30.dp))
-                    .background(Brush.linearGradient(listOf(Color(0x33FFFFFF), Color(0x0DFFFFFF)))),
+                    .background(
+                        Brush.linearGradient(
+                            listOf(Color(0x40FFFFFF), Color(0x0DFFFFFF), Color(0x33FFFFFF))
+                        )
+                    ),
                 contentAlignment = Alignment.Center,
             ) {
                 Text("n", color = Color.White, fontSize = 58.sp, fontWeight = FontWeight.ExtraBold)

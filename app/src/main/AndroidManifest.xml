@@ -35,15 +35,10 @@
             </intent-filter>
         </activity>
 
-        <!--
-          AdMob application ID.
-          NOTE: Google's official *test* app ID is used so the SDK never crashes
-          before a real AdMob account is linked. Replace with the live app ID
-          (ca-app-pub-5404699533591624~XXXXXXXXXX) once AdMob is approved.
-        -->
+        <!-- AdMob application ID (nctools AdMob account, production). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-5404699533591624~5076564796" />
 
         <!-- FileProvider for update APK + result sharing -->
         <provider
